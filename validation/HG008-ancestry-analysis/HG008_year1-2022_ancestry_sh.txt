@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+cd /scratch16/rmccoy22/rmccoy22/giab_ancestry
+
+# get common SNPs from 1000 Genomes
+plink --vcf /data/rmccoy22/vcf_phase3_hg38_v2/ALL.chr21.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
+  --snps-only \
+  --keep-allele-order \
+  --maf 0.05 \
+  --output-chr chrM \
+  --recode vcf \
+  --out 1kgp_chr21
+bgzip -@24 -f 1kgp_chr21.vcf
+tabix -p vcf 1kgp_chr21.vcf.gz
+
+# create a file with common SNP positions
+zcat 1kgp_chr21.vcf.gz | grep -v ^# | awk '{print $1"\t"$2"\t"$2"\tSNP"NR}' > common_snps.txt
+
+for i in 2 3
+do
+plink --vcf IDUDI000${i}_snp.vcf.gz \
+  --chr chr21 \
+  --extract range common_snps.txt \
+  --keep-allele-order \
+  --recode vcf \
+  --out IDUDI000${i}_chr21 \
+  --allow-extra-chr \
+  --output-chr chrM
+bgzip -f IDUDI000${i}_chr21.vcf
+tabix -p vcf IDUDI000${i}_chr21.vcf.gz
+done
+
+bcftools merge \
+  -m none \
+  -O z \
+  --missing-to-ref \
+  -o merged_chr21.vcf.gz \
+  --threads 24 \
+  IDUDI0002_chr21.vcf.gz IDUDI0003_chr21.vcf.gz 1kgp_chr21.vcf.gz
+
+plink --vcf merged_chr21.vcf.gz --pca --out GIAB_1KGP
