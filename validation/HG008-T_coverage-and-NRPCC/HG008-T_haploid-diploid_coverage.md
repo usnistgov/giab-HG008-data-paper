@@ -5,7 +5,7 @@ Document generated J.McDaniel 2024-09-13 to document commands and calcuations us
 Because the tumor cell line is aneuploid, we also estimate the mean coverage of apparently diploid and haploid regions, as well as number of reads per tumor chromosomal copy (NRPCC). Single cell data showed that for 120 cells, chromosome 4 was haploid in almost all cells for HG008-T and was used as the basis for calculating haploid coverage. 
 
 **1) 1 Mbp segments of GRCh38 chromosome 4 that don't contain any 
-[segdups](https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/v3[…]SegmentalDuplications/GRCh38_notinsegdups_gt10kb.bed.gz) 
+[segdups](https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/v3.3/GRCh38@all/SegmentalDuplications/GRCh38_notinsegdups_gt10kb.bed.gz) 
 were generated.**
 
 `bedtools2.30.0/bin/intersectBed -u -f 1.0 -a chr4_1Mbp_segments_GRCh38.bed -b GRCh38_notinsegdups_gt10kb.bed.gz  > chr4_1Mbp_segments_GRCh38_notinanysegdups.bed`
