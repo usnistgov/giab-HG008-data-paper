@@ -1,0 +1,200 @@
+---
+title: "HG008 long read plot"
+author: "Jennifer McDaniel"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggridges)
+library(ggpubr)
+```
+Documentation of data (get_bam_stat_output and extract_samtools_stats_output) used in these plots can be found in "long read processing for HG008 data paper figures.ipynb". Long read datasets included in the HG008 scientific data paper are:
+- PB-HiFi-1: PB-Revio T/N-P 
+- PB-HiFi-2: BCM-Revio T/N-D
+- ONT-UL-1:  UCSC-ONT-ul T
+- ONT-std-2: UCSC-ONT-std T
+- ONT-std-1: NE-ONT-std N-D/N-P
+
+## Loading and Tidying data
+```{r aln_stat_df}
+#read in crosswalk of bam stat filenames with tech, sample and dataset_ID
+bam_stat_data_list <- read.csv("long-read-bam-stat-datasets.csv",header=TRUE)
+
+# parse filenames from bam_stat_output filenames. 
+aln_stat_files <- list.files("get_bam_stat_output", 
+                     pattern = "bam.stats.tsv.gz",
+                     full.names = TRUE,
+                     recursive = TRUE)
+aln_names <- str_extract(aln_stat_files, "(?<=get_bam_stat_output/).*(HG008[^/]+)")
+
+
+# BAM statistics combined bam stat files
+col_names <- c("read_id", 
+               "aln_lengthsum",  
+               "aln_lengthmax",
+               "aln_count",
+               "ref_lengthsum",
+               "ref_lengthmax",
+               "ref_lengthcount",
+               "bases")
+
+aln_stat_df <- aln_stat_files %>%  
+    set_names(aln_names) %>% 
+    map_dfr(read_tsv, 
+            .id = "filename")%>%
+  left_join(bam_stat_data_list, by="filename")
+```
+## Summary Table
+Genome Total Coverage Max Read Length N50 (inputs from get_bam_stat.py output)
+```{r}
+calc_n50 <- function(seq_lengths){
+    sorted_lengths <- sort(seq_lengths)
+    cum_lengths <- cumsum(sorted_lengths)
+    min(sorted_lengths[cum_lengths >= max(cum_lengths)*0.5])
+}
+
+aln_summary_stats_df <- aln_stat_df %>% 
+    mutate(aln_lengthmax = as.numeric(aln_lengthmax)) %>% 
+    group_by(data_id) %>% 
+    summarise(N50 = calc_n50(aln_lengthmax),
+              max_read = max(aln_lengthmax),
+           throughput = sum(aln_lengthmax))
+```
+## Read length figure (plot a)
+input from get_bam_stat.py output
+caption: Mapped read length distribution weighted by aligned read length
+```{r plot_a_fig}
+read_len_fig <- aln_stat_df %>%
+  sample_frac(0.10) %>%
+  ggplot(aes(weight = aln_lengthmax, x = aln_lengthmax, 
+             color = data_id, linetype = sample, fill = data_id)) + 
+  geom_density(alpha = 0.5) +  # Use geom_density for standard density plots
+  scale_color_brewer(palette="Set2") +
+  scale_fill_brewer(palette="Set2") +
+  facet_grid(dataset_id ~ ., scales = "fixed") + 
+  scale_x_log10(limits = c(700, 1e+06)) + # scale set to line up with plot "c"
+  theme_bw() +
+  labs(x = "Read Length (bp)", y = "Density weighted by read length") +  # Adjust y-axis label
+  scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +  
+  theme_pubr() +
+  theme(axis.line.y.left = element_blank(), # Remove y-axis line on the left
+        axis.ticks.y = element_blank(),  # Remove y-axis ticks
+        axis.text.y = element_blank(),  # Remove y-axis labels
+        strip.text.y = element_text(size = 9)) # Adjust size for better readability
+
+#ggsave("plot_a_fig.png", plot = read_len_fig, height = 10, width = 6)
+```
+## Coverage Distribution Figure (plot b)
+input from extract_samtools_stats.sh output
+caption: Coverage distribution showing number of genome positions (Mb) at each integer coverage
+```{r plot_b_df}
+samtools_extract_data_list <- read.csv("long-read-extract-samtools-stats-datasets.csv",header=TRUE)
+
+genome_cov_df <- list.files("extract_samtools_stats_output", pattern = "stats_cov", full.names = TRUE) %>% 
+  set_names(str_extract(., "(?<=extract_samtools_stats_output/).*(HG008[^/]+)")) %>%
+  map_dfr(read_tsv, col_names = c("coverage_bin", "coverage_max", "nbases"), .id = "filename") %>%
+  left_join(samtools_extract_data_list, by="filename")
+```
+
+```{r plot_b_fig}
+cov_dist_fig <- genome_cov_df %>% 
+  filter(nbases > 1e7 | coverage_max < 150) %>% 
+  ggplot() + 
+  geom_path(aes(x = coverage_max, y = nbases/1000000, color= data_id, linetype = sample))+
+  scale_color_brewer(palette="Set2")+
+  facet_grid(dataset_id ~ .)+
+  labs(x = "Coverage", y = "Bases (Mb)", color = "NIST ID") + 
+  scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +
+  theme_pubr() +
+  theme(strip.text.y = element_text(size = 9), # Adjust size for better readability
+        axis.text.y = element_text(size = 8))   # Adjust y-axis text size
+
+#ggsave("plot_b_fig.png", plot = cov_dist_fig, height = 10, width = 6)
+```
+## Coverage Figure (plot c)
+inputs from get_bam_stat.py output
+caption: Inverse cumulative distribution showing coverage of apparently diploid regions by aligned reads longer than the length on the x axis (this assumes no whole genome doubling)
+```{r plot_c_df}
+cov_breaks <- c(0:1000) * 1000
+cov_df <- aln_stat_df %>% 
+  mutate(length_bins = cut(aln_lengthmax, 
+                           breaks = c(cov_breaks, max(.$aln_lengthmax)),
+                           labels = cov_breaks)) %>%
+  group_by(data_id, length_bins, sample) %>% 
+  summarise(n_bases = sum(as.numeric(aln_lengthmax)),
+            n_reads = n(),
+            .groups = 'drop') %>%
+  group_by(data_id, sample) %>%
+  mutate(coverage = ifelse(sample == "T", n_bases / 2.1e9, n_bases / 3.1e9)) %>% 
+#(from JZook slack 7/3/34) coverage for N based on GRCh38 yield/mean coverage = 109.45/35=3.1 Gbp for PacBio-Revio, coverage for T based on GRCh38 yield/diploid coverage = 244.98/116=2.11 Gbp for PacBio-Revio. For ULONT, we get 110.35/54=2.04, and stdONT is 138.12/63=2.19, and BCM-Revio is 224.43/106=2.12. I'm thinking we just go with the average of these and use 2.1e9 for the haploid genome 
+  arrange(desc(length_bins)) %>%
+  mutate(cum_coverage = cumsum(coverage)) %>%
+  mutate(length_bins = as.numeric(as.character(length_bins)))
+```
+
+```{r plot_c_fig}
+cov_v_length_fig <- ggplot(cov_df) + 
+    geom_path(aes(x = length_bins, y = cum_coverage, color = data_id, linetype = sample)) +
+    scale_color_brewer(palette="Set2")+
+    scale_x_log10(limits = c(700, 1e+06)) + #scale set to line up with plot "a"
+    theme_bw() + 
+    annotation_logticks(sides = "b") + 
+    scale_y_continuous(breaks=seq(0,120,by=10)) +
+    labs(x = "Read Length (bp)",
+         y = "Diploid coverage by reads > Read Length", 
+         color = "Dataset", linetype = "Sample") + 
+  scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +
+  theme_pubr() +
+  theme(strip.text.y = element_text(size = 9),
+        axis.text.y = element_text(size = 8),
+        legend.direction  ="vertical") #needed for legend in panel
+
+#ggsave("plot_c_fig.png", cov_v_length_fig, height = 15, width = 8)
+```
+## Panel Plot (a,b and c)
+panel with plots a,b,c. This will be used in the paper as figure.
+caption: Long-read Coverage Plots. Read length and coverage distributions for long-read datasets (a) Mapped read length distribution weighted by aligned read length. (b) Coverage distribution showing number of genome positions (Mb) at each integer coverage. (c) Inverse cumulative distribution showing coverage of apparently diploid regions by aligned reads longer than the length on the x axis (this assumes no whole genome doubling).
+```{r plot_abc}
+#keeping a and c on same scale
+#arrange plots a and b
+plots_ab <- ggarrange(read_len_fig, 
+                cov_dist_fig, 
+                 labels = c("a","b"), 
+                 align = "v",
+                 legend = "none",
+                 ncol = 2, 
+                 nrow = 1)
+
+#legend to be used for panel
+legend <- get_legend(cov_v_length_fig)  #use legend from plot c as legend for panel, needed to add separate otherwise plot c was shifted left
+cov_minus_leg <- cov_v_length_fig + theme(legend.position = "none") #plot c without legend
+
+#arrange plot c and panel legend
+plot_c <- ggarrange(cov_minus_leg, # plot c in row 1 col 1
+                   legend, #legend to be placed in row 1 col 2
+                   labels = c("c", ""), 
+                   label.y= c(1.1, 1),
+                   ncol = 2, 
+                   nrow = 1)
+
+#combine all plots
+panel_abc <- ggarrange(plots_ab, plot_c,
+                    ncol =1,
+                    nrow =2,
+                    heights = c(1.25, 1))  # Adjust heights to control spacing
+
+ggsave("HG008_long-read_sci_data_fig.pdf", width = 12, height = 8, units = "in")
+
+```
+### Coverage by ONT-UL reads longer than 100kb
+Stat reported in validation section "Figure 5c depicts this information in a different manner to make it easier to see the coverage by reads longer than a certain length (e.g., there is 33x coverage by ONT-UL reads longer than 100 kb)."
+
+  data_id    length_bins sample   n_bases n_reads coverage cum_coverage
+  <chr>            <dbl> <chr>      <dbl>   <int>    <dbl>        <dbl>
+1 ONT-uL-1_T      100000 T      508729088    5062    0.242         32.9
+```{r cov_uL_100kb}
+cov_100kb <- cov_df %>% filter(data_id == "ONT-uL-1_T") %>% filter(length_bins == 100000)
+```

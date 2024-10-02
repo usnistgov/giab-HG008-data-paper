@@ -1,0 +1,25 @@
+filename,technology,sample,normal_tumor,tissue,dataset_id,data_id
+HG008-N-D_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_94x_samtools_stats_cov.txt,ONT-std,N-D,normal,duodenal,ONT-std-1,ONT-std-1_N-D
+HG008-N-D_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_94x_samtools_stats_read_lengths.txt,ONT-std,N-D,normal,duodenal,ONT-std-1,ONT-std-1_N-D
+HG008-N-D_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_94x_samtools_stats_summary.txt,ONT-std,N-D,normal,duodenal,ONT-std-1,ONT-std-1_N-D
+HG008-N-D_PacBio-HiFi-Revio_20240313_68x_GRCh38-GIABv3_samtools_stats_cov.txt,HiFi,N-D,normal,duodenal,PB-HiFi-2,PB-HiFi-2_N-D
+HG008-N-D_PacBio-HiFi-Revio_20240313_68x_GRCh38-GIABv3_samtools_stats_read_lengths.txt,HiFi,N-D,normal,duodenal,PB-HiFi-2,PB-HiFi-2_N-D
+HG008-N-D_PacBio-HiFi-Revio_20240313_68x_GRCh38-GIABv3_samtools_stats_summary.txt,HiFi,N-D,normal,duodenal,PB-HiFi-2,PB-HiFi-2_N-D
+HG008-N-P_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_41x_samtools_stats_cov.txt,ONT-std,N-P,normal,pancreatic,ONT-std-1,ONT-std-1_N-P
+HG008-N-P_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_41x_samtools_stats_read_lengths.txt,ONT-std,N-P,normal,pancreatic,ONT-std-1,ONT-std-1_N-P
+HG008-N-P_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_41x_samtools_stats_summary.txt,ONT-std,N-P,normal,pancreatic,ONT-std-1,ONT-std-1_N-P
+HG008-N-P_PacBio-HiFi-Revio_20240125_35x_GRCh38-GIABv3_samtools_stats_cov.txt,HiFi,N-P,normal,pancreatic,PB-HiFi-1,PB-HiFi-1_N-P
+HG008-N-P_PacBio-HiFi-Revio_20240125_35x_GRCh38-GIABv3_samtools_stats_read_lengths.txt,HiFi,N-P,normal,pancreatic,PB-HiFi-1,PB-HiFi-1_N-P
+HG008-N-P_PacBio-HiFi-Revio_20240125_35x_GRCh38-GIABv3_samtools_stats_summary.txt,HiFi,N-P,normal,pancreatic,PB-HiFi-1,PB-HiFi-1_N-P
+HG008-T_GRCh38_GIABv3_ONT-R10.4.1-doradov0.3.4-5mCG-5hmC-63x_UCSC_20230905_samtools_stats_cov.txt,ONT-std,T,tumor,cell line,ONT-std-2,ONT-std-2_T
+HG008-T_GRCh38_GIABv3_ONT-R10.4.1-doradov0.3.4-5mCG-5hmC-63x_UCSC_20230905_samtools_stats_read_lengths.txt,ONT-std,T,tumor,cell line,ONT-std-2,ONT-std-2_T
+HG008-T_GRCh38_GIABv3_ONT-R10.4.1-doradov0.3.4-5mCG-5hmC-63x_UCSC_20230905_samtools_stats_summary.txt,ONT-std,T,tumor,cell line,ONT-std-2,ONT-std-2_T
+HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado0.4.3_sup4.2.0_5mCG_5hmCG_54x_UCSC_20231031_samtools_stats_cov.txt,ONT-uL,T,tumor,cell line,ONT-uL-1,ONT-uL-1_T
+HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado0.4.3_sup4.2.0_5mCG_5hmCG_54x_UCSC_20231031_samtools_stats_read_lengths.txt,ONT-uL,T,tumor,cell line,ONT-uL-1,ONT-uL-1_T
+HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado0.4.3_sup4.2.0_5mCG_5hmCG_54x_UCSC_20231031_samtools_stats_summary.txt,ONT-uL,T,tumor,cell line,ONT-uL-1,ONT-uL-1_T
+HG008-T_PacBio-HiFi-Revio_20240125_116x_GRCh38-GIABv3_samtools_stats_cov.txt,HiFi,T,tumor,cell line,PB-HiFi-1,PB-HiFi-1_T
+HG008-T_PacBio-HiFi-Revio_20240125_116x_GRCh38-GIABv3_samtools_stats_read_lengths.txt,HiFi,T,tumor,cell line,PB-HiFi-1,PB-HiFi-1_T
+HG008-T_PacBio-HiFi-Revio_20240125_116x_GRCh38-GIABv3_samtools_stats_summary.txt,HiFi,T,tumor,cell line,PB-HiFi-1,PB-HiFi-1_T
+HG008-T_PacBio-HiFi-Revio_20240313_106x_GRCh38-GIABv3_samtools_stats_cov.txt,HiFi,T,tumor,cell line,PB-HiFi-2,PB-HiFi-2_T
+HG008-T_PacBio-HiFi-Revio_20240313_106x_GRCh38-GIABv3_samtools_stats_read_lengths.txt,HiFi,T,tumor,cell line,PB-HiFi-2,PB-HiFi-2_T
+HG008-T_PacBio-HiFi-Revio_20240313_106x_GRCh38-GIABv3_samtools_stats_summary.txt,HiFi,T,tumor,cell line,PB-HiFi-2,PB-HiFi-2_T
