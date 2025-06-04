@@ -1,5 +1,5 @@
 ---
-title: "HG008 long read plot"
+title: "HG008 long read data plot"
 author: "Jennifer McDaniel"
 date: "`r Sys.Date()`"
 output: html_document
@@ -11,10 +11,11 @@ library(tidyverse)
 library(ggridges)
 library(ggpubr)
 ```
-Documentation of data (get_bam_stat_output and extract_samtools_stats_output) used in these plots can be found in "long read processing for HG008 data paper figures.ipynb". Long read datasets included in the HG008 scientific data paper are:
+Long read data summary plots for figure 5 in the HG008 Scientific Data manuscript. Documentation of data (get_bam_stat_output and extract_samtools_stats_output) used in these plots can be found in "long read processing for HG008 data paper figures.ipynb". Long read datasets included in the HG008 scientific data paper are:
 - PB-HiFi-1: PB-Revio T/N-P 
 - PB-HiFi-2: BCM-Revio T/N-D
-- ONT-UL-1:  UCSC-ONT-ul T
+- ONT-UL-1:  UCSC-ONT-Ul T
+- ONT-UL-2: NE-ONT-UL
 - ONT-std-2: UCSC-ONT-std T
 - ONT-std-1: NE-ONT-std N-D/N-P
 
@@ -69,21 +70,27 @@ caption: Mapped read length distribution weighted by aligned read length
 ```{r plot_a_fig}
 read_len_fig <- aln_stat_df %>%
   sample_frac(0.10) %>%
-  ggplot(aes(weight = aln_lengthmax, x = aln_lengthmax, 
-             color = data_id, linetype = sample, fill = data_id)) + 
-  geom_density(alpha = 0.5) +  # Use geom_density for standard density plots
-  scale_color_brewer(palette="Set2") +
-  scale_fill_brewer(palette="Set2") +
+  ggplot(aes(weight = aln_lengthmax, 
+             x = aln_lengthmax, 
+             color = data_id, 
+             linetype = sample, 
+             fill = data_id)) + 
+  geom_density(alpha = 0.5, linewidth=1) +  # Use geom_density for standard density plots
+  scale_color_brewer(palette="Paired") +
+  scale_fill_brewer(palette="Paired") +
   facet_grid(dataset_id ~ ., scales = "fixed") + 
   scale_x_log10(limits = c(700, 1e+06)) + # scale set to line up with plot "c"
-  theme_bw() +
   labs(x = "Read Length (bp)", y = "Density weighted by read length") +  # Adjust y-axis label
   scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +  
   theme_pubr() +
+  theme_bw() + #black and white background to plot
   theme(axis.line.y.left = element_blank(), # Remove y-axis line on the left
         axis.ticks.y = element_blank(),  # Remove y-axis ticks
         axis.text.y = element_blank(),  # Remove y-axis labels
-        strip.text.y = element_text(size = 9)) # Adjust size for better readability
+        strip.text.y = element_text(size = 7, face = "bold"),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.border = element_blank()) # Adjust size for better readability,panel args are for theme_grey to remove lines from background
 
 #ggsave("plot_a_fig.png", plot = read_len_fig, height = 10, width = 6)
 ```
@@ -103,14 +110,22 @@ genome_cov_df <- list.files("extract_samtools_stats_output", pattern = "stats_co
 cov_dist_fig <- genome_cov_df %>% 
   filter(nbases > 1e7 | coverage_max < 150) %>% 
   ggplot() + 
-  geom_path(aes(x = coverage_max, y = nbases/1000000, color= data_id, linetype = sample))+
-  scale_color_brewer(palette="Set2")+
-  facet_grid(dataset_id ~ .)+
+  geom_path(aes(x = coverage_max, 
+                y = nbases/1000000, 
+                color= data_id, 
+                linetype = sample), 
+            size=1) +
+  scale_color_brewer(palette="Paired") + 
+  facet_grid(dataset_id ~ .) +
   labs(x = "Coverage", y = "Bases (Mb)", color = "NIST ID") + 
   scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +
   theme_pubr() +
-  theme(strip.text.y = element_text(size = 9), # Adjust size for better readability
-        axis.text.y = element_text(size = 8))   # Adjust y-axis text size
+  theme_bw() +
+  theme(strip.text.y = element_text(size = 7, 
+                                    face = "bold"),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.border = element_blank()) # Adjust size for better readability
 
 #ggsave("plot_b_fig.png", plot = cov_dist_fig, height = 10, width = 6)
 ```
@@ -121,7 +136,7 @@ caption: Inverse cumulative distribution showing coverage of apparently diploid 
 cov_breaks <- c(0:1000) * 1000
 cov_df <- aln_stat_df %>% 
   mutate(length_bins = cut(aln_lengthmax, 
-                           breaks = c(cov_breaks, max(.$aln_lengthmax)),
+                           breaks = c(cov_breaks,max(.$aln_lengthmax)),
                            labels = cov_breaks)) %>%
   group_by(data_id, length_bins, sample) %>% 
   summarise(n_bases = sum(as.numeric(aln_lengthmax)),
@@ -137,8 +152,11 @@ cov_df <- aln_stat_df %>%
 
 ```{r plot_c_fig}
 cov_v_length_fig <- ggplot(cov_df) + 
-    geom_path(aes(x = length_bins, y = cum_coverage, color = data_id, linetype = sample)) +
-    scale_color_brewer(palette="Set2")+
+    geom_path(aes(x = length_bins, y = cum_coverage, 
+                  color = data_id, 
+                  linetype = sample), 
+              size=1) +
+    scale_color_brewer(palette="Paired") +
     scale_x_log10(limits = c(700, 1e+06)) + #scale set to line up with plot "a"
     theme_bw() + 
     annotation_logticks(sides = "b") + 
@@ -148,9 +166,10 @@ cov_v_length_fig <- ggplot(cov_df) +
          color = "Dataset", linetype = "Sample") + 
   scale_linetype_manual(values = c("T" = "solid", "N-D" = "dotted", "N-P" = "dashed")) +
   theme_pubr() +
+  theme_bw() +
   theme(strip.text.y = element_text(size = 9),
         axis.text.y = element_text(size = 8),
-        legend.direction  ="vertical") #needed for legend in panel
+        legend.direction  ="vertical", panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank()) #needed for legend in panel
 
 #ggsave("plot_c_fig.png", cov_v_length_fig, height = 15, width = 8)
 ```
@@ -186,7 +205,7 @@ panel_abc <- ggarrange(plots_ab, plot_c,
                     nrow =2,
                     heights = c(1.25, 1))  # Adjust heights to control spacing
 
-ggsave("HG008_long-read_sci_data_fig.pdf", width = 12, height = 8, units = "in")
+ggsave("Figure 5.pdf", width = 12, height = 8, units = "in")
 
 ```
 ### Coverage by ONT-UL reads longer than 100kb
@@ -196,5 +215,6 @@ Stat reported in validation section "Figure 5c depicts this information in a dif
   <chr>            <dbl> <chr>      <dbl>   <int>    <dbl>        <dbl>
 1 ONT-uL-1_T      100000 T      508729088    5062    0.242         32.9
 ```{r cov_uL_100kb}
-cov_100kb <- cov_df %>% filter(data_id == "ONT-uL-1_T") %>% filter(length_bins == 100000)
+cov_100kb_UL1 <- cov_df %>% filter(data_id == "ONT-UL-1_T") %>% filter(length_bins == 100000)
+cov_100kb_UL2 <- cov_df %>% filter(data_id == "ONT-UL-2_T") %>% filter(length_bins == 100000)
 ```

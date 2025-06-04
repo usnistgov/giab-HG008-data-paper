@@ -4,6 +4,7 @@ HG008-N-D_PacBio-HiFi-Revio_20240313_68x_GRCh38-GIABv3.bam.stats.tsv.gz,HiFi,N-D
 HG008-N-P_GRCh38-GIABv3_ONT-R1041-dorado_0.5.3_5mC_5hmC_41x.bam.stats.tsv.gz,ONT-std,N-P,normal,pancreatic,ONT-std-1,ONT-std-1_N-P
 HG008-N-P_PacBio-HiFi-Revio_20240125_35x_GRCh38-GIABv3.bam.stats.tsv.gz,HiFi,N-P,normal,pancreatic,PB-HiFi-1,PB-HiFi-1_N-P
 HG008-T_GRCh38_GIABv3_ONT-R10.4.1-doradov0.3.4-5mCG-5hmC-63x_UCSC_20230905.bam.stats.tsv.gz,ONT-std,T,tumor,cell line,ONT-std-2,ONT-std-2_T
-HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado0.4.3_sup4.2.0_5mCG_5hmCG_54x_UCSC_20231031.bam.stats.tsv.gz,ONT-uL,T,tumor,cell line,ONT-uL-1,ONT-uL-1_T
+HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado0.4.3_sup4.2.0_5mCG_5hmCG_54x_UCSC_20231031.bam.stats.tsv.gz,ONT-UL,T,tumor,cell line,ONT-UL-1,ONT-UL-1_T
 HG008-T_PacBio-HiFi-Revio_20240125_116x_GRCh38-GIABv3.bam.stats.tsv.gz,HiFi,T,tumor,cell line,PB-HiFi-1,PB-HiFi-1_T
 HG008-T_PacBio-HiFi-Revio_20240313_106x_GRCh38-GIABv3.bam.stats.tsv.gz,HiFi,T,tumor,cell line,PB-HiFi-2,PB-HiFi-2_T
+HG008-T_GRCh38_GIABv3_ONT-UL-R10.4.1-dorado_0.8.1_sup.5mC_5hmC_54x_20241216.bam.stats.tsv.gz,ONT-UL,T,tumor,cell line,ONT-UL-2,ONT-UL-2_T
